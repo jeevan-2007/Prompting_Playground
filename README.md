@@ -6,6 +6,7 @@ A small Node.js prompt playground for chatting with a Groq-hosted model from the
 
 - `src/index.js` - CLI entry point. It starts the readline prompt loop, collects the system prompt and temperature, sends messages to the model, and prints responses plus token usage.
 - `src/callModel.js` - Groq client wrapper. It loads environment variables, creates the `Groq` SDK client, and sends chat completion requests.
+- `src/extract.js` - JSON extraction demo. It sends a fixed invoice-style text sample to the model, requests structured JSON output, parses the response, and validates the result with Zod.
 - `package.json` - Project metadata, module type, and dependencies.
 - `.env` - Local environment variables, including your Groq API key.
 
@@ -82,6 +83,21 @@ Important behavior:
 - The model is hard-coded as `llama-3.3-70b-versatile`.
 - `callModel(messages, temperature)` sends the full conversation history to `groq.chat.completions.create()`.
 - The function returns the raw completion response to the caller so the CLI can read both the generated text and token usage.
+
+### `src/extract.js`
+
+This file is a structured extraction example. It takes a fixed block of messy invoice text, asks the model to return JSON with a specific schema, and then validates the parsed result with Zod.
+
+Important behavior:
+
+- `invoiceSchema` defines the expected shape: `vendor`, `amount`, `due_date`, and `priority`.
+- The request uses `response_format: { type: 'json_object' }` and a low temperature to encourage machine-readable output.
+- The prompt tells the model not to guess and to use `null` when a field is uncertain.
+- The script still validates the parsed response after generation, because JSON mode does not guarantee factual accuracy.
+
+## Lesson Learned
+
+Tested whether explicit prompt instructions ("use null if uncertain, do not guess") combined with low temperature (`0.1`) would stop the model from fabricating a due-date year not present in the source text. Result: the model consistently invented a year regardless. This confirms that JSON mode plus schema validation solve structural correctness valid syntax, correct types, allowed value sets but cannot solve factual correctness. The model can still produce confidently wrong data that passes every technical check. This is a core limitation that motivates retrieval-grounded approaches (RAG) over pure prompting for factual accuracy.
 
 ## Notes
 
