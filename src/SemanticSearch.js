@@ -33,7 +33,7 @@ const documents = [
   "Git rebase rewrites commit history, while merge preserves it as a new commit.",
 ];
 
-const query = "Outer Space?";
+const query = "What's the probation period?";
 
 // Embed everything
 const queryEmbedding = await getEmbedding(query);
